@@ -1,0 +1,96 @@
+import android.app.Activity;
+import android.app.ProgressDialog;
+import android.util.Log;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class ServerCall {
+    public static void getResponse(final Activity context, final String method, final Map<String, String> params, boolean progress, final VolleyCallback callback) {
+        final ProgressDialog progressDialog;
+        progressDialog = new ProgressDialog(context);
+
+        Log.e("Service: ", method + "");
+        if (progress) {
+            progressDialog.setMessage("Loading..."); // Setting Message
+            progressDialog.setTitle("ProgressDialog"); // Setting Title
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER); // Progress Dialog Style Spinner
+            progressDialog.show(); // Display Progress Dialog
+            progressDialog.setCancelable(false);
+            progressDialog.show();
+        }
+
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, CommonUtilities.BASE_URL + method, new Response.Listener<String>() {
+
+            @Override
+            public void onResponse(String response) {
+                progressDialog.dismiss();
+                callback.onSuccess(response);
+
+                Log.e("Response: ", response + "");
+
+            }
+
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                progressDialog.dismiss();
+                callback.onError(error.toString());
+
+            }
+
+        }) {
+
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+
+                //params.put(CommonUtilities.key_version, BuildConfig.VERSION_NAME);
+
+                Log.e("Params: ", params + "");
+
+                return params;
+
+            }
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+
+                HashMap<String, String> headers = new HashMap<>();
+
+                return headers;
+
+            }
+
+        };
+
+        int socketTimeout = 20000;//20 seconds – change to what you want
+        RetryPolicy policy = new DefaultRetryPolicy(socketTimeout, DefaultRetryPolicy.DEFAULT_MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
+
+        RequestQueue requestQueue = Volley.newRequestQueue(context);
+
+        stringRequest.setRetryPolicy(policy);
+
+        requestQueue.add(stringRequest);
+
+
+    }
+
+    public interface VolleyCallback {
+
+        void onSuccess(String result);
+
+        void onError(String error);
+
+    }
+
+}
