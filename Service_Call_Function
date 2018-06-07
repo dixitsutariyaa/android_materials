@@ -1,0 +1,31 @@
+void callData() {
+
+        final Map<String, String> param = new HashMap<>();
+
+        param.put(CommonUtilities.encoded_key, random_function());
+        ServerCall.getResponse(this, CommonUtilities.key_generate_token, param, true, new ServerCall.VolleyCallback() {
+
+            @Override
+
+            public void onSuccess(String result) {
+
+                LoginRespose model = new Gson().fromJson(result, LoginRespose.class);
+
+                if (model != null) {
+
+
+                } else {
+
+                }
+
+            }
+
+            @Override
+
+            public void onError(String error) {
+
+            }
+
+        });
+
+    }
